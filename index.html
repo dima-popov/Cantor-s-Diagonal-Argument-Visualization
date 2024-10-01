@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cantor Diagonal Argument</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 0 auto;
+        }
+
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Cantor's Diagonal Argument Visualization</h1>
+    <canvas id="cantorCanvas" width="600" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('cantorCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const gridSize = 50; // Size of each grid cell
+        const maxSteps = 100; // Maximum number of steps to draw the path
+
+        let step = 0;
+        let x = 0;
+        let y = 0;
+        let direction = 1; // 1 for right-down diagonal, -1 for left-up diagonal
+
+        // Function to draw the grid with fraction labels
+        function drawGrid() {
+            ctx.strokeStyle = '#ccc';
+
+            for (let col = 0; col <= canvasWidth / gridSize; col++) {
+                for (let row = 0; row <= canvasHeight / gridSize; row++) {
+                    ctx.strokeRect(col * gridSize, row * gridSize, gridSize, gridSize);
+                    ctx.fillStyle = 'black';
+
+                }
+            }
+        }
+
+
+        function drawLabels() {
+
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            for (let col = 0; col <= canvasWidth / gridSize; col++) {
+                for (let row = 0; row <= canvasHeight / gridSize; row++) {
+                    const fraction = `${row + 1}/${col + 1}`; // Rational number (m/n)
+                    ctx.fillStyle = 'black';
+                    ctx.fillText(fraction, col * gridSize + gridSize / 2, row * gridSize + gridSize / 2);
+                }
+            }
+        }
+
+        // Function to draw the diagonal line as a zigzag
+        function drawZigzagPath() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            drawGrid();
+            drawLabels();
+            let naturalNum = 1;
+            let tempX = 0;
+            let tempY = 0;
+            let tempDir = 1;
+
+            // Draw path up to the current step
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(tempX * gridSize + gridSize / 2, tempY * gridSize + gridSize / 2);
+
+            for (let s = 0; s < step; s++) {
+                ctx.lineTo(tempX * gridSize + gridSize / 2, tempY * gridSize + gridSize / 2);
+                naturalNum++;
+
+                if (tempDir === 1) {
+                    if (tempX === 0) {
+                        tempY++;
+                        tempDir = -1;
+                    } else {
+                        tempX--;
+                        tempY++;
+                    }
+                } else {
+                    if (tempY === 0) {
+                        tempX++;
+                        tempDir = 1;
+                    } else {
+                        tempX++;
+                        tempY--;
+                    }
+                }
+
+                // Stop drawing if we're out of bounds
+                if (tempX * gridSize > canvasWidth || tempY * gridSize > canvasHeight) {
+                    break;
+                }
+            }
+            ctx.stroke();
+
+            // Draw the current point at the latest position
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(x * gridSize + gridSize / 4, y * gridSize + gridSize / 4, gridSize / 2, gridSize / 2);
+            ctx.fillStyle = 'black';
+            ctx.fillText(naturalNum, x * gridSize + gridSize / 2, y * gridSize + gridSize / 2 + 15);
+        }
+
+        // Function to animate the path
+        function animateZigzag() {
+            drawZigzagPath();
+
+            // Move in a diagonal zigzag pattern
+            if (direction === 1) {
+                if (x === 0) {
+                    y++;
+                    direction = -1;
+                } else {
+                    x--;
+                    y++;
+                }
+            } else {
+                if (y === 0) {
+                    x++;
+                    direction = 1;
+                } else {
+                    x++;
+                    y--;
+                }
+            }
+
+            // Stop if we've reached the max number of steps
+            if (x * gridSize <= canvasWidth && y * gridSize <= canvasHeight && step < maxSteps) {
+                step++;
+                requestAnimationFrame(animateZigzag);
+            } else {
+                drawLabels();
+            }
+        }
+
+        // Start the animation
+        drawGrid();
+        animateZigzag();
+
+    </script>
+</body>
+
+</html>
